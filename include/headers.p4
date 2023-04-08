@@ -1,15 +1,13 @@
 #ifndef __HEADERS__
 #define __HEADERS__
 
-#include "int_headers.p4"
+#include "defines.p4"
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
 
-typedef bit<9>  egressSpec_t;
-typedef bit<48> macAddr_t;
-typedef bit<32> ip4Addr_t;
+
 
 /* bit<48> is just an unsigned integer that is exactly 48 bits wide.
  * P4_16 also has int<N> for 2's complement signed integers, and
@@ -21,24 +19,25 @@ typedef bit<32> ip4Addr_t;
 
 
 header ethernet_t {
-    macAddr_t dstAddr;
-    macAddr_t srcAddr;
+    mac_addr_t dst_addr;
+    mac_addr_t src_addr;
     bit<16>   etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<6>  dscp;
+    bit<2>  ecn;
+    bit<16> len;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> frag_offset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdr_checksum;
+    ipv4_addr_t src_addr;
+    ipv4_addr_t dst_addr;
 }
 
 header tcp_t {
@@ -60,6 +59,111 @@ header udp_t {
     bit<16> dst_port;
     bit<16> length_;
     bit<16> checksum;
+}
+
+/*************************************************************************
+*********************** INT v1.0  ***********************************
+*************************************************************************/
+
+
+
+
+
+/* INT shim header for TCP/UDP */
+header intl4_shim_t {
+    bit<8> int_type;
+    bit<8> rsvd1;
+    bit<8> len;
+    bit<6> dscp;
+    bit<2> rsvd2;
+}
+
+/* INT header */
+header int_header_t {
+    bit<4>  ver;
+    bit<2>  rep;
+    bit<1>  c;
+    bit<1>  e;
+    bit<1>  m;
+    bit<7>  rsvd1;
+    bit<3>  rsvd2;
+    bit<5>  hop_metadata_len; /* the length of the metadata added by a single INT node (4-byte words) */
+    bit<8>  remaining_hop_cnt;
+    bit<4>  instruction_mask_0003; /* split the bits for lookup */
+    bit<4>  instruction_mask_0407;
+    bit<4>  instruction_mask_0811;
+    bit<4>  instruction_mask_1215;
+    bit<16> rsvd3;
+}
+
+/* INT metadata headers */
+header int_switch_id_t {
+    bit<32> switch_id;
+}
+
+header int_port_ids_t {
+    bit<16> ingress_port_id;
+    bit<16> egress_port_id;
+}
+
+header int_hop_latency_t {
+    bit<32> hop_latency;
+}
+
+header int_q_occupancy_t {
+    bit<8> q_id;
+    bit<24> q_occupancy;
+}
+
+header int_ingress_tstamp_t {
+    bit<32> ingress_tstamp;
+}
+
+header int_egress_tstamp_t {
+    bit<32> egress_tstamp;
+}
+
+header int_level2_port_ids_t {
+    bit<32> ingress_port_id;
+    bit<32> egress_port_id;
+}
+
+header int_egress_port_tx_util_t {
+    bit<32> egress_port_tx_util;
+}
+
+header int_data_t {
+    // Maximum int metadata stack size in bits
+    // (0x3F - 3) * 4 * 8 (excluding INT shim header and INT header)
+    varbit<1920> data;
+}
+
+/* INT report headers */
+header int_report_fixed_header_t {
+    bit<4>  ver;
+    bit<4>  len;
+    bit<3>  nproto;
+    bit<6>  rep_md_bits;
+    bit<6>  rsvd;
+    bit<1>  d;
+    bit<1>  q;
+    bit<1>  f;
+    bit<6>  hw_id;
+    bit<32> sw_id;
+    bit<32> seq_no;
+    bit<32> ingress_tstamp;
+}
+
+
+
+struct int_metadata_t {
+    switch_id_t switch_id;
+    bit<16> new_bytes;
+    bit<8>  new_words;
+    bool  source;
+    bool  sink;
+    bool transit;
+    bit<8> int_shim_len;
 }
 
 
@@ -103,17 +207,22 @@ header udp_t {
  * completely up to you.  Similarly the struct type names 'metadata'
  * and 'headers' below can be anything you want to name them. */
 
-struct metadata {
-    int_metadata_t       int_metadata;
-    intl4_shim_t         int_shim;
-    bit<16>              int_len_bytes;
+struct local_metadata_t {
+    bit<16>       l4_src_port;
+    bit<16>       l4_dst_port;
+    next_hop_id_t next_hop_id;
+    bit<16>       selector;
+    int_metadata_t int_meta;
+    bool compute_checksum;
 }
 
-struct headers {
+struct headers_t {
 
     /* Original packet headers */
     ethernet_t   ethernet;
     ipv4_t       ipv4;
+    tcp_t        tcp;
+    udp_t        udp;
 
     /* INT headers */
     intl4_shim_t              int_shim;
@@ -140,4 +249,4 @@ struct headers {
     int_report_fixed_header_t report_fixed_header;
 }
 
-#endif
+#endif /* __HEADERS__ */

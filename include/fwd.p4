@@ -3,8 +3,8 @@
 
 #include "headers.p4"
 
-control FwdIngress(inout headers hdr,
-                  inout metadata meta,
+control FwdIngress(inout headers_t hdr,
+                  inout local_metadata_t local_metadata,
                   inout standard_metadata_t standard_metadata) {
     
     /*
@@ -31,10 +31,10 @@ control FwdIngress(inout headers hdr,
         mark_to_drop(standard_metadata);
     }
     
-    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+    action ipv4_forward(mac_addr_t dst_addr, egress_spec_t port) {
         standard_metadata.egress_spec = port;
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
+        hdr.ethernet.src_addr = hdr.ethernet.src_addr;
+        hdr.ethernet.dst_addr = dst_addr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
     
@@ -44,7 +44,7 @@ control FwdIngress(inout headers hdr,
              * 'match_kind' in P4_16, and the two most common other
              * choices seen in P4 programs are 'exact' and
              * 'ternary'. */
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dst_addr: lpm;
         }
         actions = {
             ipv4_forward;

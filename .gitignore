@@ -1,3 +1,25 @@
+# Build and logs directory
 pcaps/
 logs/
 build/
+
+# Compiled P4 program
+*.p4i
+*.p4c
+
+# Intermediate files
+*.json
+*.p4info
+*.p4t
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
+# IDE-specific files
+.vscode/
+
+# Byte-compiled / optimized / DLL files
+utils/p4runtime_lib/__pycache__/
+*.py[cod]
+*$py.class

@@ -24,7 +24,7 @@ def get_if():
 
 
 def handle_pkt(pkt):
-    if UDP in pkt and pkt[UDP].dport == 1234:
+    if UDP in pkt and pkt[UDP].dport == 8002:
         print("got a packet")
         pkt.show2()
         sys.stdout.flush()
