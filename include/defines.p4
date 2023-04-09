@@ -24,8 +24,12 @@ const bit<16> TYPE_IPV4 = 0x800;
 const bit<8> TYPE_TCP = 0x06; // Value for TCP protocol in IP header
 const bit<8> TYPE_UDP = 0x11; // Value for UDP protocol in IP header
 
-/* indicate INT by DSCP value */
+/* indicate INT by DSCP value 
+ * 0x17 is 23 in decimal 
+ */
 const bit<6> DSCP_INT = 0x17;
+/* Masking is done by setting all the bits except the one(s) we want to 0. 
+ * 0x3F in binary is 00111111 */
 const bit<6> DSCP_MASK = 0x3F;
 
 const bit<8> INT_HEADER_LEN_WORD = 3;
@@ -40,5 +44,7 @@ typedef bit<16> l4_port_t;
 typedef bit<9>  port_t;
 typedef bit<16> next_hop_id_t;
 typedef bit<32> switch_id_t;
+
+#define MAX_PORTS 255
 
 #endif /* __DEFINES__ */

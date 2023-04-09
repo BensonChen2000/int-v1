@@ -6,15 +6,13 @@
 #include "include/headers.p4"
 #include "include/fwd.p4"
 #include "include/parser.p4"
+#include "include/int_source.p4"
 
 /*************************************************************************
 *********************** P A R S E R  ***********************************
 *************************************************************************/
 
-/* The ingress parser here is pretty simple.  It assumes every packet
- * starts with a 14-byte Ethernet header, and if the ether type is
- * 0x0800, it proceeds to parse the 20-byte mandatory part of an IPv4
- * header, ignoring whether IPv4 options might be present. */
+/* INT parser defined in "include/parser.p4" */
 
 
 
@@ -39,6 +37,11 @@ control MyIngress(inout headers_t hdr,
     
     apply {
         FwdIngress.apply(hdr, local_metadata, standard_metadata);
+        process_int_source_sink.apply(hdr, local_metadata, standard_metadata);
+
+        if (local_metadata.int_meta.source == true) {
+            process_int_source.apply(hdr, local_metadata, standard_metadata);
+        }
     }
 }
 
@@ -125,38 +128,7 @@ control MyComputeChecksum(inout headers_t  hdr, inout local_metadata_t local_met
 ***********************  D E P A R S E R  *******************************
 *************************************************************************/
 
-/* The deparser controls what headers are created for the outgoing
- * packet. */
-control MyDeparser(packet_out packet, in headers_t hdr) {
-    apply {
-        /* The emit() method takes a header.  If that header's hidden
-         * 'valid' bit is true, then emit() appends the contents of
-         * the header (which may have been modified in the ingress or
-         * egress pipelines above) into the outgoing packet.
-         *
-         * If that header's hidden 'valid' bit is false, emit() does
-         * nothing. */
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv4);
-        packet.emit(hdr.tcp);
-        packet.emit(hdr.udp);
-
-        /* This ends the deparser definition.
-         *
-         * Note that for each packet, the target device records where
-         * parsing ended, and it considers every byte of data in the
-         * packet after the last parsed header as 'payload'.  For
-         * _this_ P4 program, even a TCP header immediately following
-         * the IPv4 header is considered part of the payload.  For a
-         * different P4 program that parsed the TCP header, the TCP
-         * header would not be considered part of the payload.
-         * 
-         * Whatever is considered as payload for this particular P4
-         * program for this packet, that payload is appended after the
-         * end of whatever sequence of bytes that the deparser
-         * creates. */
-    }
-}
+/* INT deparser defined in "include/parser.p4"
 
 /*************************************************************************
 ***********************  S W I T C H  *******************************
@@ -167,10 +139,10 @@ control MyDeparser(packet_out packet, in headers_t hdr) {
  * which pieces to plug into which "slot" in the target
  * architecture. */
 V1Switch(
-IntParser(),
+int_parser(),
 MyVerifyChecksum(),
 MyIngress(),
 MyEgress(),
 MyComputeChecksum(),
-MyDeparser()
+int_deparser()
 ) main;

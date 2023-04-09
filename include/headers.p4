@@ -70,7 +70,7 @@ header udp_t {
 
 
 /* INT shim header for TCP/UDP */
-header intl4_shim_t {
+header int_shim_t {
     bit<8> int_type;
     bit<8> rsvd1;
     bit<8> len;
@@ -225,7 +225,7 @@ struct headers_t {
     udp_t        udp;
 
     /* INT headers */
-    intl4_shim_t              int_shim;
+    int_shim_t                int_shim;
     int_header_t              int_header;
 
     /* Local INT node metadata */
