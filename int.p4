@@ -1,6 +1,7 @@
 #include <core.p4>
 #include <v1model.p4>
 
+#define DEBUG
 
 #include "include/defines.p4"
 #include "include/headers.p4"
@@ -39,6 +40,10 @@ control MyIngress(inout headers_t hdr,
     apply {
         FwdIngress.apply(hdr, local_metadata, standard_metadata);
         process_int_source_sink.apply(hdr, local_metadata, standard_metadata);
+
+        // record ingress port and ingress timestamp
+        local_metadata.int_meta.ingress_tstamp = standard_metadata.ingress_global_timestamp;
+        local_metadata.int_meta.ingress_port = (bit<16>)standard_metadata.ingress_port;
 
         if (local_metadata.int_meta.source == true) {
             process_int_source.apply(hdr, local_metadata, standard_metadata);

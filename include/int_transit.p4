@@ -37,68 +37,42 @@ control Int_transit(inout headers_t hdr, inout local_metadata_t meta, inout stan
             hdr.int_switch_id.switch_id = meta.int_meta.switch_id;
         }
 
-        // TODO : record ingress port during ingress then record in hear here
-
         // checked
         action int_set_header_1() {
             hdr.int_port_ids.setValid();
 
-            // change later
-            hdr.int_port_ids.ingress_port_id = 6;
-            hdr.int_port_ids.egress_port_id = 0;
-
-            // hdr.int_port_ids.ingress_port_id = (bit<16>)meta.int_meta.ingress_tstamp;
-            // hdr.int_port_ids.egress_port_id = (bit<16>)standard_metadata.egress_port;
+            hdr.int_port_ids.ingress_port_id = meta.int_meta.ingress_port;
+            hdr.int_port_ids.egress_port_id = (bit<16>)standard_metadata.egress_port;
         }
-
-        // TODO : uncomment the line to enable recording hop latency 
 
         // checked
         action int_set_header_2() {
             hdr.int_hop_latency.setValid();
 
-            // change later
-            hdr.int_hop_latency.hop_latency = 0;
-
-            //  hdr.int_hop_latency.hop_latency = (bit<32>)(standard_metadata.egress_global_timestamp - standard_metadata.ingress_global_timestamp);
+            hdr.int_hop_latency.hop_latency = (bit<32>)(standard_metadata.egress_global_timestamp - standard_metadata.ingress_global_timestamp);
         }
-
-        // TODO : uncomment q_occupancy to record q_occupancy
 
         // checked
         action int_set_header_3() {
             hdr.int_q_occupancy.setValid();
             hdr.int_q_occupancy.q_id = 0; // qid not defined in v1model
-
-            // change later
-            hdr.int_q_occupancy.q_occupancy = 0;
-            // hdr.int_q_occupancy.q_occupancy = (bit<24>)standard_metadata.enq_qdepth;
+            hdr.int_q_occupancy.q_occupancy = (bit<24>)standard_metadata.enq_qdepth;
         }
-
-        // TODO : record ingress time stamp during ingress then save it to header
 
         // checked   
         action int_set_header_4() {
             hdr.int_ingress_tstamp.setValid();
 
-            // change later
-            hdr.int_ingress_tstamp.ingress_tstamp = 0;
-
-            // bit<64> _timestamp = (bit<64>)meta.int_meta.ingress_tstamp;  
-            // hdr.int_ingress_tstamp.ingress_tstamp = hdr.int_ingress_tstamp.ingress_tstamp + 1000 * _timestamp;
+            bit<32> _timestamp = (bit<32>)meta.int_meta.ingress_tstamp;  
+            hdr.int_ingress_tstamp.ingress_tstamp = hdr.int_ingress_tstamp.ingress_tstamp + 1000 * _timestamp;
         }
-
-        // TODO : uncomment when transit is working
 
         // checked
         action int_set_header_5() {
             hdr.int_egress_tstamp.setValid();
 
-            // change later
-            hdr.int_egress_tstamp.egress_tstamp = 0;
-
-            // bit<64> _timestamp = (bit<64>)standard_metadata.egress_global_timestamp;
-            // hdr.int_egress_tstamp.egress_tstamp = hdr.int_egress_tstamp.egress_tstamp + 1000 * _timestamp;
+            bit<32> _timestamp = (bit<32>)standard_metadata.egress_global_timestamp;
+            hdr.int_egress_tstamp.egress_tstamp = hdr.int_egress_tstamp.egress_tstamp + 1000 * _timestamp;
         }
 
         // checked
@@ -404,10 +378,6 @@ control Int_transit(inout headers_t hdr, inout local_metadata_t meta, inout stan
             }
         }
 
-        table debug_transit {
-            key = { hdr.int_port_ids.ingress_port_id : exact; }
-            actions = {}
-        }
 
         // checked
         action int_hop_cnt_increment() {
@@ -433,6 +403,21 @@ control Int_transit(inout headers_t hdr, inout local_metadata_t meta, inout stan
         action int_update_udp_ac() {
             hdr.udp.length_ = hdr.udp.length_ + (bit<16>)meta.int_meta.new_bytes;
         }
+
+        #ifdef DEBUG
+        // this table is used to print debug message to log file only
+        table debug_transit {
+            key = { 
+                hdr.int_switch_id.switch_id : exact;
+                hdr.int_port_ids.ingress_port_id : exact;
+                hdr.int_hop_latency.hop_latency : exact;
+                hdr.int_ingress_tstamp.ingress_tstamp : exact; 
+                hdr.int_q_occupancy.q_occupancy : exact;
+                hdr.int_egress_tstamp.egress_tstamp : exact;
+            }
+            actions = {}
+        }
+        #endif
 
         apply {	
 
@@ -470,9 +455,11 @@ control Int_transit(inout headers_t hdr, inout local_metadata_t meta, inout stan
 
             if (hdr.int_shim.isValid()) 
                 int_update_shim_ac();
-
+            
+            #ifdef DEBUG
             // debug log to check 
             debug_transit.apply();
+            #endif
         }
     }
 

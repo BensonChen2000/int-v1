@@ -164,6 +164,10 @@ struct int_metadata_t {
     bool  sink;
     bool transit;
     bit<8> int_shim_len;
+
+    // record ingress_time stamp and port
+    bit<48> ingress_tstamp;
+    bit<16> ingress_port;
 }
 
 
