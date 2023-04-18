@@ -7,6 +7,7 @@
 #include "include/fwd.p4"
 #include "include/parser.p4"
 #include "include/int_source.p4"
+#include "include/int_transit.p4"
 
 /*************************************************************************
 *********************** P A R S E R  ***********************************
@@ -52,7 +53,10 @@ control MyIngress(inout headers_t hdr,
 control MyEgress(inout headers_t hdr,
                  inout local_metadata_t local_metadata,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+
+    apply { 
+        Int_transit.apply(hdr, local_metadata, standard_metadata);
+    }
 }
 
 /*************************************************************************
