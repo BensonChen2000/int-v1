@@ -98,6 +98,7 @@ control process_int_source_sink (
 
     direct_counter(CounterType.packets_and_bytes) counter_set_source;
     direct_counter(CounterType.packets_and_bytes) counter_set_sink;
+    direct_counter(CounterType.packets_and_bytes) counter_set_transit;
 
     action nop() { }
 
@@ -109,6 +110,12 @@ control process_int_source_sink (
     action int_set_sink () {
         local_metadata.int_meta.sink = true;
         counter_set_sink.count();
+    }
+
+    action int_set_transit () {
+
+        local_metadata.int_meta.transit = true;
+        counter_set_transit.count();
     }
 
     table tb_set_source {
@@ -136,9 +143,23 @@ control process_int_source_sink (
         size = MAX_PORTS;
     }
 
+    table tb_set_transit {
+        key = {
+            standard_metadata.ingress_port: exact;
+        }
+        actions = {
+            int_set_transit;
+            @defaultonly nop();
+        }
+        counters = counter_set_transit;
+        const default_action = nop();
+        size = MAX_PORTS;
+    }
+
     apply {
         tb_set_source.apply();
         tb_set_sink.apply();
+        tb_set_transit.apply();
     }
 }
 #endif  /* __INT_SOURCE__ */

@@ -36,8 +36,31 @@ control MyIngress(inout headers_t hdr,
                   inout local_metadata_t local_metadata,
                   inout standard_metadata_t standard_metadata) {
     
-    
+    #ifdef DEBUG
+    // this table is used to print debug message to log file only
+    // to ensure that int transit in s3 did send the correct message to s2
+    table debug_ingress {
+        key = { 
+            hdr.int_switch_id.switch_id : exact;
+            hdr.int_port_ids.ingress_port_id : exact;
+            hdr.int_hop_latency.hop_latency : exact;
+            hdr.int_ingress_tstamp.ingress_tstamp : exact; 
+            hdr.int_q_occupancy.q_occupancy : exact;
+            hdr.int_egress_tstamp.egress_tstamp : exact;
+            hdr.ipv4.dscp : exact;
+            local_metadata.int_meta.transit : exact;
+        }
+        actions = {}
+    }
+    #endif
+
     apply {
+
+        #ifdef DEBUG
+            // debug log to check 
+            debug_ingress.apply();
+        #endif
+
         FwdIngress.apply(hdr, local_metadata, standard_metadata);
         process_int_source_sink.apply(hdr, local_metadata, standard_metadata);
 
@@ -60,7 +83,11 @@ control MyEgress(inout headers_t hdr,
                  inout standard_metadata_t standard_metadata) {
 
     apply { 
-        Int_transit.apply(hdr, local_metadata, standard_metadata);
+
+        // only run int_transit if it is a transit node
+        if (local_metadata.int_meta.transit == true) {
+            Int_transit.apply(hdr, local_metadata, standard_metadata);
+        }
     }
 }
 
