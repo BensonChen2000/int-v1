@@ -122,6 +122,16 @@ control process_int_source_sink (
     action configure_sink(bit<16> sink_reporting_port) {
 
         local_metadata.int_meta.sink_reporting_port = (bit<16>)sink_reporting_port; 
+        // CloneType.I2E means this funciton is used in the ingress stage (E2E for egress)
+
+        /***
+        * Calling clone_preserving_field_list during execution of the ingress
+        * or egress control will cause the packet to be cloned, sometimes
+        * also called mirroring, i.e. zero or more copies of the packet are
+        * made, and each will later begin egress processing as an independent
+        * packet from the original packet.  The original packet continues
+        * with its normal next steps independent of the clone(s).
+        ***/
         clone_preserving_field_list(CloneType.I2E, INT_REPORT_MIRROR_SESSION_ID, CLONE_FL_1);
 
     }

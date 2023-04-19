@@ -11,8 +11,8 @@ control Int_report(inout headers_t hdr, inout local_metadata_t meta, inout stand
 
         // Ethernet **********************************************************
         hdr.report_ethernet.setValid();
-        hdr.report_ethernet.dstAddr = collector_mac;
-        hdr.report_ethernet.srcAddr = dp_mac;
+        hdr.report_ethernet.dst_addr = collector_mac;
+        hdr.report_ethernet.src_addr = dp_mac;
         hdr.report_ethernet.etherType = 0x0800;
 
         // IPv4 **************************************************************
@@ -23,58 +23,57 @@ control Int_report(inout headers_t hdr, inout local_metadata_t meta, inout stand
         hdr.report_ipv4.ecn = 0;
 
         // 2x ipv4 header (20*2) + udp header (8) + eth header (14) + report header (16) + int data len
-        hdr.report_ipv4.totalLen = (bit<16>)(20 + 20 + 8 + 14)
+        hdr.report_ipv4.len = (bit<16>)(20 + 20 + 8 + 14)
             + ((bit<16>)(INT_REPORT_HEADER_LEN_WORDS)<<2)
             + (((bit<16>)hdr.int_shim.len) << 2);
             
         // add size of original tcp/udp header
         if (hdr.tcp.isValid()) {
-            hdr.report_ipv4.totalLen = hdr.report_ipv4.totalLen
-                + (((bit<16>)hdr.tcp.dataOffset) << 2);
+            hdr.report_ipv4.len = hdr.report_ipv4.len
+                + (((bit<16>)hdr.tcp.data_offset) << 2);
 
         } else {
-            hdr.report_ipv4.totalLen = hdr.report_ipv4.totalLen + 8;
+            hdr.report_ipv4.len = hdr.report_ipv4.len + 8;
         }
 
-        hdr.report_ipv4.id = 0;
+        hdr.report_ipv4.identification = 0;
         hdr.report_ipv4.flags = 0;
-        hdr.report_ipv4.fragOffset = 0;
+        hdr.report_ipv4.frag_offset = 0;
         hdr.report_ipv4.ttl = 64;
         hdr.report_ipv4.protocol = 17; // UDP
-        hdr.report_ipv4.srcAddr = dp_ip;
-        hdr.report_ipv4.dstAddr = collector_ip;
+        hdr.report_ipv4.src_addr = dp_ip;
+        hdr.report_ipv4.dst_addr = collector_ip;
 
         // UDP ***************************************************************
         hdr.report_udp.setValid();
-        hdr.report_udp.srcPort = 0;
-        hdr.report_udp.dstPort = collector_port;
-        hdr.report_udp.len = hdr.report_ipv4.totalLen - 20;
+        hdr.report_udp.src_port = 0;
+        hdr.report_udp.dst_port = collector_port;
+        hdr.report_udp.length_ = hdr.report_ipv4.len - 20;
         // INT report fixed header ************************************************/
         // INT report version 1.0
         hdr.report_fixed_header.setValid();
         hdr.report_fixed_header.ver = INT_REPORT_VERSION;
         hdr.report_fixed_header.len = INT_REPORT_HEADER_LEN_WORDS;
 
-        hdr.report_fixed_header.nprot = 0; // 0 for Ethernet
-        hdr.report_fixed_header.rep_md_bits_high = 0;
-        hdr.report_fixed_header.rep_md_bits_low = 0;
-        hdr.report_fixed_header.reserved = 0;
+        hdr.report_fixed_header.nproto = 0; // 0 for Ethernet
+        hdr.report_fixed_header.rep_md_bits = 0;
+        hdr.report_fixed_header.rsvd = 0;
         hdr.report_fixed_header.d = 0;
         hdr.report_fixed_header.q = 0;
         // f - indicates that report is for tracked flow, INT data is present
         hdr.report_fixed_header.f = 1;
         // hw_id - specific to the switch, e.g. id of linecard
         hdr.report_fixed_header.hw_id = 0;
-        hdr.report_fixed_header.switch_id = meta.int_metadata.switch_id;
+        hdr.report_fixed_header.sw_id = meta.int_meta.switch_id;
         report_seq_num_register.read(seq_num_value, 0);
-        hdr.report_fixed_header.seq_num = seq_num_value;
+        hdr.report_fixed_header.seq_no = seq_num_value;
         report_seq_num_register.write(0, seq_num_value + 1);
 
         hdr.report_fixed_header.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
 
         // Original packet headers, INT shim and INT data come after report header.
         // drop all data besides int report and report eth header
-        truncate((bit<32>)hdr.report_ipv4.totalLen + 14);
+        truncate((bit<32>)hdr.report_ipv4.len + 14);
         }
         table tb_int_reporting {
             actions = {

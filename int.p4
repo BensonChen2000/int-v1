@@ -1,7 +1,8 @@
 #include <core.p4>
 #include <v1model.p4>
 
-#define DEBUG
+// using the debg mode will make the mirroring log to disappear!
+// #define DEBUG
 
 #include "include/defines.p4"
 #include "include/headers.p4"
@@ -121,9 +122,9 @@ control MyEgress(inout headers_t hdr,
             Int_transit.apply(hdr, local_metadata, standard_metadata);
         }
 
-        if (local_metadata.int_meta.sink == true) {
-            Int_sink.apply(hdr, local_metadata, standard_metadata);
-        }
+        
+        Int_sink.apply(hdr, local_metadata, standard_metadata);
+        
 
         #ifdef DEBUG
             // debug log to check 

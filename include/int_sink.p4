@@ -1,6 +1,8 @@
 #ifndef __INT_SINK__
 #define __INT_SINK__
 
+#include "int_report.p4"
+
 control Int_sink(inout headers_t hdr, inout local_metadata_t meta, inout standard_metadata_t standard_metadata) {
 
     action remove_sink_header() {
@@ -33,7 +35,14 @@ control Int_sink(inout headers_t hdr, inout local_metadata_t meta, inout standar
         if (!hdr.int_header.isValid())
             return;
 
-        remove_sink_header();
+        // only remove the header if it is the original packet
+        if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_NORMAL && meta.int_meta.sink == true) {
+            remove_sink_header();
+
+        // if the packet is the cloned packer, then prepare int report on the packet
+        } else if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_CLONE) {
+            Int_report.apply(hdr, meta, standard_metadata);
+        }
     }
 }
 
