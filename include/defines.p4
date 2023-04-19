@@ -36,6 +36,12 @@ const bit<8> INT_HEADER_LEN_WORD = 3;
 const bit<16> INT_HEADER_SIZE = 8;
 const bit<16> INT_SHIM_HEADER_SIZE = 4;
 
+const bit<8> EMPTY_FL    = 0;
+const bit<8> RESUB_FL_1  = 1;
+const bit<8> CLONE_FL_1  = 2;
+const bit<8> RECIRC_FL_1 = 3;
+
+const bit<32> INT_REPORT_MIRROR_SESSION_ID = 1;   // mirror session specyfing egress_port for cloned INT report packets, defined by switch CLI command   
 
 typedef bit<9>  egress_spec_t;
 typedef bit<48> mac_addr_t;

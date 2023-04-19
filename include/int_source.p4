@@ -118,6 +118,14 @@ control process_int_source_sink (
         counter_set_transit.count();
     }
 
+    // configures int sink by setting the reporting port 
+    action configure_sink(bit<16> sink_reporting_port) {
+
+        local_metadata.int_meta.sink_reporting_port = (bit<16>)sink_reporting_port; 
+        clone_preserving_field_list(CloneType.I2E, INT_REPORT_MIRROR_SESSION_ID, CLONE_FL_1);
+
+    }
+
     table tb_set_source {
         key = {
             standard_metadata.ingress_port: exact;
@@ -130,6 +138,7 @@ control process_int_source_sink (
         const default_action = nop();
         size = MAX_PORTS;
     }
+
     table tb_set_sink {
         key = {
             standard_metadata.egress_spec: exact;
@@ -139,6 +148,19 @@ control process_int_source_sink (
             @defaultonly nop();
         }
         counters = counter_set_sink;
+        const default_action = nop();
+        size = MAX_PORTS;
+    }
+
+    table tb_configure_sink {
+        key = {
+            standard_metadata.egress_spec: exact;
+        }
+        actions = {
+            configure_sink;
+            @defaultonly nop();
+        }
+
         const default_action = nop();
         size = MAX_PORTS;
     }
@@ -160,6 +182,10 @@ control process_int_source_sink (
         tb_set_source.apply();
         tb_set_sink.apply();
         tb_set_transit.apply();
+
+        if (local_metadata.int_meta.sink == true) {
+            tb_configure_sink.apply();
+        }
     }
 }
 #endif  /* __INT_SOURCE__ */

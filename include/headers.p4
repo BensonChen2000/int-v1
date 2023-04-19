@@ -168,6 +168,9 @@ struct int_metadata_t {
     // record ingress_time stamp and port
     bit<48> ingress_tstamp;
     bit<16> ingress_port;
+
+    // record which port the int report is sent to
+    bit<16> sink_reporting_port;
 }
 
 
