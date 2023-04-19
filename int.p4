@@ -9,6 +9,7 @@
 #include "include/parser.p4"
 #include "include/int_source.p4"
 #include "include/int_transit.p4"
+#include "include/int_sink.p4"
 
 /*************************************************************************
 *********************** P A R S E R  ***********************************
@@ -85,7 +86,7 @@ control MyEgress(inout headers_t hdr,
     #ifdef DEBUG
     // this table is used to print debug message to log file only
     // to ensure that int transit in s3 did send the correct message to s2
-    table debug_egress {
+    table debug_egressin {
         key = { 
             hdr.int_switch_id.switch_id : exact;
             hdr.ipv4.dscp : exact;
@@ -94,13 +95,24 @@ control MyEgress(inout headers_t hdr,
         }
         actions = {}
     }
+
+        table debug_egressout {
+        key = { 
+            hdr.int_switch_id.switch_id : exact;
+            hdr.ipv4.dscp : exact;
+            local_metadata.int_meta.sink : exact;
+            local_metadata.int_meta.transit : exact;
+        }
+        actions = {}
+    }
+
     #endif
 
     apply { 
 
         #ifdef DEBUG
             // debug log to check 
-            debug_egress.apply();
+            debug_egressin.apply();
         #endif
 
 
@@ -110,8 +122,13 @@ control MyEgress(inout headers_t hdr,
         }
 
         if (local_metadata.int_meta.sink == true) {
-            
+            Int_sink.apply(hdr, local_metadata, standard_metadata);
         }
+
+        #ifdef DEBUG
+            // debug log to check 
+            debug_egressout.apply();
+        #endif
     }
 }
 

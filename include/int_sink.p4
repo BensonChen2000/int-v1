@@ -7,9 +7,9 @@ control Int_sink(inout headers_t hdr, inout local_metadata_t meta, inout standar
          // restore original headers
         hdr.ipv4.dscp = hdr.int_shim.dscp;
         bit<16> len_bytes = ((bit<16>)hdr.int_shim.len) << 2;
-        hdr.ipv4.totalLen = hdr.ipv4.totalLen - len_bytes;
+        hdr.ipv4.len = hdr.ipv4.len - len_bytes;
         if (hdr.udp.isValid()) {
-            hdr.udp.len = hdr.udp.len - len_bytes;
+            hdr.udp.length_ = hdr.udp.length_ - len_bytes;
         }
 
         // remove INT data added in INT sink
@@ -33,14 +33,7 @@ control Int_sink(inout headers_t hdr, inout local_metadata_t meta, inout standar
         if (!hdr.int_header.isValid())
             return;
 
-        if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_NORMAL && meta.int_metadata.remove_int == 1) {
-            // remove INT headers from a frame
-            remove_sink_header();
-        }
-        if (standard_metadata.instance_type == PKT_INSTANCE_TYPE_INGRESS_CLONE) {
-            // prepare an INT report for the INT collector
-            Int_report.apply(hdr, meta, standard_metadata);
-        }
+        remove_sink_header();
     }
 }
 
