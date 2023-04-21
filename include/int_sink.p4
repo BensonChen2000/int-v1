@@ -27,6 +27,7 @@ control Int_sink(inout headers_t hdr, inout local_metadata_t meta, inout standar
         // remove int data
         hdr.int_shim.setInvalid();
         hdr.int_header.setInvalid();
+        hdr.int_data.setInvalid();
     }
 
     apply {

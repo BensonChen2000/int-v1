@@ -80,10 +80,10 @@ control int_deparser(
     apply {
 
         /* INT report headers */
-        // packet.emit(hdr.report_ethernet);
-        // packet.emit(hdr.report_ipv4);
-        // packet.emit(hdr.report_udp);
-        // packet.emit(hdr.report_fixed_header);
+        packet.emit(hdr.report_ethernet);
+        packet.emit(hdr.report_ipv4);
+        packet.emit(hdr.report_udp);
+        packet.emit(hdr.report_fixed_header);
 
         /* Original packet headers */
         /* The emit() method takes a header.  If that header's hidden
