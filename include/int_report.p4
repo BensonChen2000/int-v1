@@ -5,7 +5,7 @@ control Int_report(inout headers_t hdr, inout local_metadata_t meta, inout stand
     bit<32> seq_num_value = 0;
 
     // INT Report structure
-    // [Eth][IP][UDP][INT RAPORT HDR][ETH][IP][UDP/TCP][INT SHIM][INT DATA]
+    // [Eth][IP][UDP][INT RAPORT HDR][ETH][IP][UDP/TCP][INT SHIM][INT HEADER][INT DATA]
 
     action send_report(bit<48> dp_mac, bit<32> dp_ip, bit<48> collector_mac, bit<32> collector_ip, bit<16> collector_port) {
 
@@ -22,10 +22,8 @@ control Int_report(inout headers_t hdr, inout local_metadata_t meta, inout stand
         hdr.report_ipv4.dscp = 0;
         hdr.report_ipv4.ecn = 0;
 
-        // 2x ipv4 header (20*2) + udp header (8) + eth header (14) + report header (16) + int data len
-        hdr.report_ipv4.len = (bit<16>)(20 + 20 + 8 + 14)
-            + ((bit<16>)(INT_REPORT_HEADER_LEN_WORDS)<<2)
-            + (((bit<16>)hdr.int_shim.len) << 2);
+        // [IP header = 20][UDP header = 8][INT REPORT HEADER][ETH = 14][IPV4 len]
+        hdr.report_ipv4.len = 20 + 8 + + ((bit<16>)(INT_REPORT_HEADER_LEN_WORDS)<<2) +  14 + hdr.ipv4.len;
             
         // add size of original tcp/udp header
         if (hdr.tcp.isValid()) {
@@ -73,7 +71,7 @@ control Int_report(inout headers_t hdr, inout local_metadata_t meta, inout stand
 
         // Original packet headers, INT shim and INT data come after report header.
         // drop all data besides int report and report eth header
-        truncate((bit<32>)hdr.report_ipv4.len + 14);
+        // truncate((bit<32>)hdr.report_ipv4.len + 14);
         }
         table tb_int_reporting {
             actions = {
