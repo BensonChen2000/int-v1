@@ -50,6 +50,20 @@
         "dst_addr": "08:00:00:00:03:00",
         "port": 2
       }
+    },
+    {
+      "table": "MyIngress.FwdIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dst_addr": [
+          "10.0.4.4",
+          32
+        ]
+      },
+      "action_name": "MyIngress.FwdIngress.ipv4_forward",
+      "action_params": {
+        "dst_addr": "08:00:00:00:04:00",
+        "port": 2
+      }
     }
   ]
 }
