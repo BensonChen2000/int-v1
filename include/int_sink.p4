@@ -14,6 +14,10 @@ control Int_sink(inout headers_t hdr, inout local_metadata_t meta, inout standar
             hdr.udp.length_ = hdr.udp.length_ - len_bytes;
         }
 
+        // remove INT headers
+        hdr.int_shim.setInvalid();
+        hdr.int_header.setInvalid();
+
         // remove INT data added in INT sink
         hdr.int_switch_id.setInvalid();
         hdr.int_port_ids.setInvalid();
@@ -23,11 +27,16 @@ control Int_sink(inout headers_t hdr, inout local_metadata_t meta, inout standar
         hdr.int_level2_port_ids.setInvalid();
         hdr.int_q_occupancy.setInvalid();
         hdr.int_egress_port_tx_util.setInvalid();
-        
-        // remove int data
-        hdr.int_shim.setInvalid();
-        hdr.int_header.setInvalid();
+
+        // remove INT data
         hdr.int_data.setInvalid();
+        
+        // remove int report data
+        hdr.report_ethernet.setInvalid();
+        hdr.report_ipv4.setInvalid();
+        hdr.report_udp.setInvalid();
+        hdr.report_fixed_header.setInvalid();
+        
     }
 
     apply {

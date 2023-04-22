@@ -3,6 +3,7 @@
 
 // using the debg mode will make the mirroring log to disappear!
 // #define DEBUG
+#define EGRESSOUT
 
 #include "include/defines.p4"
 #include "include/headers.p4"
@@ -97,12 +98,24 @@ control MyEgress(inout headers_t hdr,
         actions = {}
     }
 
+    #endif
+
+    #ifdef EGRESSOUT
         table debug_egressout {
         key = { 
-            hdr.int_switch_id.switch_id : exact;
-            hdr.ipv4.dscp : exact;
-            local_metadata.int_meta.sink : exact;
-            local_metadata.int_meta.transit : exact;
+            hdr.ethernet.dst_addr : exact;
+            hdr.ethernet.src_addr : exact;
+            hdr.ipv4.src_addr : exact;
+            hdr.ipv4.dst_addr : exact;
+            hdr.udp.src_port : exact;
+            hdr.udp.dst_port : exact;
+
+            hdr.report_ethernet.dst_addr : exact;
+            hdr.report_ethernet.src_addr : exact;
+            hdr.report_ipv4.src_addr : exact;
+            hdr.report_ipv4.dst_addr : exact;
+            hdr.report_udp.src_port : exact;
+            hdr.report_udp.dst_port : exact;
         }
         actions = {}
     }
@@ -126,7 +139,7 @@ control MyEgress(inout headers_t hdr,
         Int_sink.apply(hdr, local_metadata, standard_metadata);
         
 
-        #ifdef DEBUG
+        #ifdef EGRESSOUT
             // debug log to check 
             debug_egressout.apply();
         #endif
