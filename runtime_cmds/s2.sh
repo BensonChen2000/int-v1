@@ -10,4 +10,4 @@ simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_configure_sink co
 # add mirroring session, from session id 1 to port 4
 simple_switch_CLI --thrift-port $THRIFT_PORT <<< "mirroring_add 1 4"
 
-simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_int_reporting send_report => f6:61:c0:6a:00:01  10.0.0.2  f6:61:c0:6a:14:21  10.0.0.254  6000"
+simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_int_reporting send_report => 08:00:00:00:02:00  10.0.2.2  f6:61:c0:6a:14:21  10.0.0.254  6000"
