@@ -4,7 +4,7 @@
 // using the debg mode will make the mirroring log to disappear!
 // #define DEBUG
 // #define EGRESSOUT
-# define DEBUGINGRESS
+// # define DEBUGINGRESS
 
 #include "include/defines.p4"
 #include "include/headers.p4"
@@ -118,6 +118,23 @@ control MyEgress(inout headers_t hdr,
             hdr.report_ipv4.dst_addr : exact;
             hdr.report_udp.src_port : exact;
             hdr.report_udp.dst_port : exact;
+
+            hdr.int_header.hop_metadata_len : exact;
+            hdr.int_header.remaining_hop_cnt : exact;
+            hdr.int_header.instruction_mask_0003 : exact;
+            hdr.int_header.instruction_mask_0407 : exact;
+
+            hdr.int_switch_id.switch_id : exact;
+            hdr.int_port_ids.ingress_port_id : exact;
+            hdr.int_port_ids.egress_port_id : exact;
+            hdr.int_hop_latency.hop_latency : exact;
+            hdr.int_q_occupancy.q_id : exact;
+            hdr.int_q_occupancy.q_occupancy : exact;
+            hdr.int_ingress_tstamp.ingress_tstamp : exact;
+            hdr.int_egress_tstamp.egress_tstamp : exact;
+            hdr.int_level2_port_ids.ingress_port_id : exact;
+            hdr.int_level2_port_ids.egress_port_id : exact;
+            hdr.int_egress_port_tx_util.egress_port_tx_util : exact;
         }
         actions = {}
     }
