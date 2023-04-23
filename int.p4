@@ -3,7 +3,8 @@
 
 // using the debg mode will make the mirroring log to disappear!
 // #define DEBUG
-#define EGRESSOUT
+// #define EGRESSOUT
+# define DEBUGINGRESS
 
 #include "include/defines.p4"
 #include "include/headers.p4"
@@ -39,7 +40,7 @@ control MyIngress(inout headers_t hdr,
                   inout local_metadata_t local_metadata,
                   inout standard_metadata_t standard_metadata) {
     
-    #ifdef DEBUG
+    #ifdef DEBUGINGRESS
     // this table is used to print debug message to log file only
     // to ensure that int transit in s3 did send the correct message to s2
     table debug_ingress {
@@ -52,6 +53,7 @@ control MyIngress(inout headers_t hdr,
             hdr.int_egress_tstamp.egress_tstamp : exact;
             hdr.ipv4.dscp : exact;
             local_metadata.int_meta.transit : exact;
+            local_metadata.int_meta.int_shim_len : exact;
         }
         actions = {}
     }
@@ -59,7 +61,7 @@ control MyIngress(inout headers_t hdr,
 
     apply {
 
-        #ifdef DEBUG
+        #ifdef DEBUGINGRESS
             // debug log to check 
             debug_ingress.apply();
         #endif
