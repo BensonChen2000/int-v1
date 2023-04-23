@@ -67,6 +67,7 @@ parser int_parser(packet_in packet,
 
     state parse_int_data {
         // Parse INT metadata stack
+        // int_shim_len is in word, so a word is 4 byte and each byte is 8 bits so it is 2^5
         packet.extract(hdr.int_data, ((bit<32>) (local_metadata.int_meta.int_shim_len - INT_HEADER_LEN_WORD)) << 5);
         transition accept;
     }
@@ -103,14 +104,15 @@ control int_deparser(
         packet.emit(hdr.int_header);
 
         /* Local INT node metadata */
-        packet.emit(hdr.int_switch_id);
-        packet.emit(hdr.int_port_ids);
-        packet.emit(hdr.int_hop_latency);
-        packet.emit(hdr.int_q_occupancy);
-        packet.emit(hdr.int_ingress_tstamp);
-        packet.emit(hdr.int_egress_tstamp);
-        packet.emit(hdr.int_level2_port_ids);
-        packet.emit(hdr.int_egress_port_tx_util);
+        packet.emit(hdr.int_switch_id); // 32 bit
+        packet.emit(hdr.int_port_ids); // 32 bit
+        packet.emit(hdr.int_hop_latency); // 32 bits
+        packet.emit(hdr.int_q_occupancy); // 32 bits
+        packet.emit(hdr.int_ingress_tstamp); // 32 bits
+        packet.emit(hdr.int_egress_tstamp); // 32 bits
+        packet.emit(hdr.int_level2_port_ids); // 32 bits
+        packet.emit(hdr.int_egress_port_tx_util); // 32 bits
+
 
         /* INT data from previous hops */
         packet.emit(hdr.int_data);
