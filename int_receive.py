@@ -307,6 +307,57 @@ def parse_int_header(payload : bytes, payload_idx):
     print(f'rsvd3 is {rsvd3}')
 
     return payload_idx
+ 
+# currently does not support multiple transits with different modes (different num_fileds) 
+# num_fields is the number of fields that are set valid during int transit
+# num_transits is the number of 
+def parse_int_data(num_fields, num_transits, payload, payload_idx) :
+    
+    #  each field is 32 bits, which is 4 bytes
+    int_data = payload[payload_idx : payload_idx + (4 * num_fields * num_transits)]
+    payload_idx += 4 * num_fields * num_transits
+
+    hdr_idx = 0
+    binStr : str = bytes2bin(int_data)
+
+    print("int_data".center(40, "*"))
+
+    for i in range(num_transits):
+
+        int_switch_id, hdr_idx = bin2int(binStr, hdr_idx, 32)
+        print(f'int_switch_id is {int_switch_id}')
+
+        ingress_port_id, hdr_idx = bin2int(binStr, hdr_idx, 16)
+        print(f'ingress_port_id is {ingress_port_id}')
+
+        egress_port_id, hdr_idx = bin2int(binStr, hdr_idx, 16)
+        print(f'egress_port_id is {egress_port_id}')
+
+        int_hop_latency, hdr_idx = bin2int(binStr, hdr_idx, 32)
+        print(f'int_hop_latency is {int_hop_latency}')
+
+        q_id, hdr_idx = bin2int(binStr, hdr_idx, 8)
+        print(f'q_id is {q_id}')
+
+        q_occupancy, hdr_idx = bin2int(binStr, hdr_idx, 24)
+        print(f'q_occupancy is {q_occupancy}')
+
+        int_ingress_tstamp, hdr_idx = bin2int(binStr, hdr_idx, 32)
+        print(f'int_ingress_tstamp is {int_ingress_tstamp}')
+
+        int_egress_tstamp, hdr_idx = bin2int(binStr, hdr_idx, 32)
+        print(f'int_egress_tstamp is {int_egress_tstamp}')
+
+        ingress_port_id, hdr_idx = bin2int(binStr, hdr_idx, 16)
+        print(f'ingress_port_id is {ingress_port_id}')
+
+        egress_port_id, hdr_idx = bin2int(binStr, hdr_idx, 16)
+        print(f'egress_port_id is {egress_port_id}')
+
+        int_egress_port_tx_util, hdr_idx = bin2int(binStr, hdr_idx, 32)
+        print(f'int_egress_port_tx_util is {int_egress_port_tx_util}')
+
+    return payload_idx
 
 def int_parser(payload : bytes) :
     #  INT report strucure
@@ -324,6 +375,7 @@ def int_parser(payload : bytes) :
     payload_idx = parse_udp_hdr(payload, payload_idx)
     payload_idx = parse_int_shim_hdr(payload, payload_idx)
     payload_idx = parse_int_header(payload, payload_idx)
+    payload_idx = parse_int_data(8, 1, payload, payload_idx)
     
 def get_if():
     ifs = get_if_list()
