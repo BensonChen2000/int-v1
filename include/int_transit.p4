@@ -230,67 +230,67 @@ control Int_transit(inout headers_t hdr, inout local_metadata_t meta, inout stan
         }
         action int_set_header_0407_i4() {
             int_set_header_5();
-            add_2();
+            add_1();
         }
         action int_set_header_0407_i5() {
             int_set_header_7();
             int_set_header_5();
-            add_3();
+            add_2();
         }
         action int_set_header_0407_i6() {
             int_set_header_6();
             int_set_header_5();
-            add_3();
+            add_2();
         }
         action int_set_header_0407_i7() {
             int_set_header_7();
             int_set_header_6();
             int_set_header_5();
-            add_4();
+            add_3();
         }
         action int_set_header_0407_i8() {
             int_set_header_4();
-            add_2();
+            add_1();
         }
         action int_set_header_0407_i9() {
             int_set_header_7();
             int_set_header_4();
-            add_3();
+            add_2();
         }
         action int_set_header_0407_i10() {
             int_set_header_6();
             int_set_header_4();
-            add_3();
+            add_2();
         }
         action int_set_header_0407_i11() {
             int_set_header_7();
             int_set_header_6();
             int_set_header_4();
-            add_4();
+            add_3();
         }
         action int_set_header_0407_i12() {
             int_set_header_5();
             int_set_header_4();
-            add_4();
+            add_2();
         }
         action int_set_header_0407_i13() {
             int_set_header_7();
             int_set_header_5();
             int_set_header_4();
-            add_5();
+            add_3();
         }
         action int_set_header_0407_i14() {
             int_set_header_6();
             int_set_header_5();
             int_set_header_4();
-            add_5();
+            add_3();
         }
         action int_set_header_0407_i15() {
             int_set_header_7();
             int_set_header_6();
             int_set_header_5();
             int_set_header_4();
-            add_6();
+            add_4();
         }
 
 
