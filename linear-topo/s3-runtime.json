@@ -20,7 +20,7 @@
       "action_name": "MyIngress.FwdIngress.ipv4_forward",
       "action_params": {
         "dst_addr": "08:00:00:00:01:00",
-        "port": 2
+        "port": 1
       }
     },
     {
@@ -34,7 +34,7 @@
       "action_name": "MyIngress.FwdIngress.ipv4_forward",
       "action_params": {
         "dst_addr": "08:00:00:00:02:00",
-        "port": 3
+        "port": 2
       }
     },
     {
@@ -48,7 +48,7 @@
       "action_name": "MyIngress.FwdIngress.ipv4_forward",
       "action_params": {
         "dst_addr": "08:00:00:00:03:33",
-        "port": 1
+        "port": 2
       }
     },
     {
@@ -62,7 +62,21 @@
       "action_name": "MyIngress.FwdIngress.ipv4_forward",
       "action_params": {
         "dst_addr": "08:00:00:00:04:44",
-        "port": 3
+        "port": 2
+      }
+    },
+    {
+      "table": "MyIngress.FwdIngress.ipv4_lpm",
+      "match": {
+        "hdr.ipv4.dst_addr": [
+          "10.0.5.5",
+          32
+        ]
+      },
+      "action_name": "MyIngress.FwdIngress.ipv4_forward",
+      "action_params": {
+        "dst_addr": "08:00:00:00:05:55",
+        "port": 1
       }
     }
   ]
