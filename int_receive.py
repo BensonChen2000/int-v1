@@ -40,7 +40,7 @@ def bin2int(binStr, bin_idx, len):
     return value, bin_idx
 
 
-def parse_int_report_hdr(payload : bytes, payload_idx):
+def parse_int_report_hdr(payload : bytes, payload_idx, printInfo=False):
     # header int_report_fixed_header_t
     # bit<4>  ver;
     # bit<4>  len;
@@ -61,34 +61,48 @@ def parse_int_report_hdr(payload : bytes, payload_idx):
     hdr_idx = 0
     binStr = bytes2bin(int_rep_hdr)
 
-    print("report_fixed_header".center(40, "*"))
+
     ver, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'ver is {ver}')
+
     len, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'len is {len}')
+
     nproto, hdr_idx = bin2int(binStr, hdr_idx, 3)
-    print(f'nproto is {nproto}')
+
     rep_md_bits, hdr_idx = bin2int(binStr, hdr_idx, 6)
-    print(f'rep_md_bits is {rep_md_bits}')
+
     rsvd, hdr_idx = bin2int(binStr, hdr_idx, 6)
-    print(f'rsvd is {rsvd}')
+
     d, hdr_idx = bin2int(binStr, hdr_idx, 1)
-    print(f'd is {d}')
+
     q, hdr_idx = bin2int(binStr, hdr_idx, 1)
-    print(f'q is {q}')
+
     f, hdr_idx = bin2int(binStr, hdr_idx, 1)
-    print(f'f is {f}')
+
     hw_id, hdr_idx = bin2int(binStr, hdr_idx, 6)
-    print(f'hw_id is {hw_id}')
+
     sw_id, hdr_idx = bin2int(binStr, hdr_idx, 32)
-    print(f'sw_id is {sw_id}')
+
     seq_no, hdr_idx = bin2int(binStr, hdr_idx, 32)
-    print(f'seq_no is {seq_no}')
     ingress_tstamp, hdr_idx = bin2int(binStr, hdr_idx, 32)
-    print(f'ingress_tstamp is {ingress_tstamp}')
+
+    if printInfo:
+
+        print("report_fixed_header".center(40, "*"))
+        print(f'ver is {ver}')
+        print(f'len is {len}')
+        print(f'nproto is {nproto}')
+        print(f'rep_md_bits is {rep_md_bits}')
+        print(f'rsvd is {rsvd}')
+        print(f'd is {d}')
+        print(f'q is {q}')
+        print(f'f is {f}')
+        print(f'hw_id is {hw_id}')
+        print(f'sw_id is {sw_id}')
+        print(f'seq_no is {seq_no}')
+        print(f'ingress_tstamp is {ingress_tstamp}')
     return payload_idx
 
-def parse_ethernet_hdr(payload : bytes, payload_idx):
+def parse_ethernet_hdr(payload : bytes, payload_idx, printInfo=False):
     # header ethernet_t 
     # bit<48> dst_addr;
     # bit<48> src_addr;
@@ -100,22 +114,19 @@ def parse_ethernet_hdr(payload : bytes, payload_idx):
     hdr_idx = 0
     binStr = bytes2bin(eth_hdr)
 
-    print(f"length of ethernet is {len(binStr)}")
-
-    print("ethernet".center(40, "*"))
-
     dst_addr, hdr_idx = bin2int(binStr, hdr_idx, 48)
-    print(f'dst_addr is {dst_addr}')
-
     src_addr, hdr_idx = bin2int(binStr, hdr_idx, 48)
-    print(f'src_addr is {src_addr}')
-
     etherType, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'etherType is {etherType}')
+
+    if printInfo:
+        print("ethernet".center(40, "*"))
+        print(f'dst_addr is {dst_addr}')
+        print(f'src_addr is {src_addr}')
+        print(f'etherType is {etherType}')
 
     return payload_idx
 
-def parse_ipv4_hdr(payload : bytes, payload_idx):
+def parse_ipv4_hdr(payload : bytes, payload_idx, printInfo=False):
     # bit<4>  version;
     # bit<4>  ihl;
     # bit<6>  dscp;
@@ -136,51 +147,40 @@ def parse_ipv4_hdr(payload : bytes, payload_idx):
     hdr_idx = 0
     binStr : str = bytes2bin(ipv4_hdr)
 
-    print("ipv4".center(40, "*"))
-
     version, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'version is {version}')
-
     ihl, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'ihl is {ihl}')
-
     dscp, hdr_idx = bin2int(binStr, hdr_idx, 6)
-    print(f'dscp is {dscp}')
-
     ecn, hdr_idx = bin2int(binStr, hdr_idx, 2)
-    print(f'ecn is {ecn}')
-
     length, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'length is {length}')
-
     identification, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'identification is {identification}')
-
     flags, hdr_idx = bin2int(binStr, hdr_idx, 3)
-    print(f'flags is {flags}')
-
     frag_offset, hdr_idx = bin2int(binStr, hdr_idx, 13)
-    print(f'frag_offset is {frag_offset}')
-
     ttl, hdr_idx = bin2int(binStr, hdr_idx, 8)
-    print(f'ttl is {ttl}')
-
     protocol, hdr_idx = bin2int(binStr, hdr_idx, 8)
-    print(f'protocol is {protocol}')
-
     hdr_checksum, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'hdr_checksum is {hdr_checksum}')
-
     src_addr, hdr_idx = bin2int(binStr, hdr_idx, 32)
-    print(f'src_addr is {src_addr}')
-
     dst_addr, hdr_idx = bin2int(binStr, hdr_idx, 32)
-    print(f'dst_addr is {dst_addr}')
+
+    if printInfo:
+        print("ipv4".center(40, "*"))
+        print(f'version is {version}')
+        print(f'ihl is {ihl}')
+        print(f'dscp is {dscp}')
+        print(f'ecn is {ecn}')
+        print(f'length is {length}')
+        print(f'identification is {identification}')
+        print(f'flags is {flags}')
+        print(f'frag_offset is {frag_offset}')
+        print(f'ttl is {ttl}')
+        print(f'protocol is {protocol}')
+        print(f'hdr_checksum is {hdr_checksum}')
+        print(f'src_addr is {src_addr}')
+        print(f'dst_addr is {dst_addr}')
 
     return payload_idx
 
 
-def parse_udp_hdr(payload : bytes, payload_idx):
+def parse_udp_hdr(payload : bytes, payload_idx, printInfo=False):
     # bit<16> src_port;
     # bit<16> dst_port;
     # bit<16> length_;
@@ -192,23 +192,21 @@ def parse_udp_hdr(payload : bytes, payload_idx):
     hdr_idx = 0
     binStr : str = bytes2bin(udp_hdr)
 
-    print("udp".center(40, "*"))
-
     src_port, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'src_port is {src_port}')
-
     dst_port, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'dst_port is {dst_port}')
-
     length_, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'length_ is {length_}')
-
     checksum, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'checksum is {checksum}')
+
+    if printInfo:
+        print("udp".center(40, "*"))
+        print(f'src_port is {src_port}')
+        print(f'dst_port is {dst_port}')
+        print(f'length_ is {length_}')
+        print(f'checksum is {checksum}')
 
     return payload_idx
 
-def parse_int_shim_hdr(payload : bytes, payload_idx):
+def parse_int_shim_hdr(payload : bytes, payload_idx, printInfo=False):
     # bit<8> int_type;
     # bit<8> rsvd1;
     # bit<8> len;
@@ -221,26 +219,23 @@ def parse_int_shim_hdr(payload : bytes, payload_idx):
     hdr_idx = 0
     binStr : str = bytes2bin(int_shim_hdr)
 
-    print("int_shim".center(40, "*"))
-
     int_type, hdr_idx = bin2int(binStr, hdr_idx, 8)
-    print(f'int_type is {int_type}')
-
     rsvd1, hdr_idx = bin2int(binStr, hdr_idx, 8)
-    print(f'rsvd1 is {rsvd1}')
-
     length, hdr_idx = bin2int(binStr, hdr_idx, 8)
-    print(f'len is {length}')
-
     dscp, hdr_idx = bin2int(binStr, hdr_idx, 6)
-    print(f'dscp is {dscp}')
-
     rsvd2, hdr_idx = bin2int(binStr, hdr_idx, 2)
-    print(f'rsvd2 is {rsvd2}')
+
+    if printInfo:
+        print("int_shim".center(40, "*"))
+        print(f'int_type is {int_type}')
+        print(f'rsvd1 is {rsvd1}')
+        print(f'len is {length}')
+        print(f'dscp is {dscp}')
+        print(f'rsvd2 is {rsvd2}')
 
     return payload_idx
 
-def parse_int_header(payload : bytes, payload_idx):
+def parse_int_header(payload : bytes, payload_idx, printInfo=False):
     # bit<4>  ver;
     # bit<2>  rep;
     # bit<1>  c;
@@ -262,100 +257,86 @@ def parse_int_header(payload : bytes, payload_idx):
     hdr_idx = 0
     binStr : str = bytes2bin(int_hdr)
 
-    print("int_header".center(40, "*"))
-
     ver, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'ver is {ver}')
-
     rep, hdr_idx = bin2int(binStr, hdr_idx, 2)
-    print(f'rep is {rep}')
-
     c, hdr_idx = bin2int(binStr, hdr_idx, 1)
-    print(f'c is {c}')
-
     e, hdr_idx = bin2int(binStr, hdr_idx, 1)
-    print(f'e is {e}')
-
     m, hdr_idx = bin2int(binStr, hdr_idx, 1)
-    print(f'm is {m}')
-
     rsvd1, hdr_idx = bin2int(binStr, hdr_idx, 7)
-    print(f'rsvd1 is {rsvd1}')
-
     rsvd2, hdr_idx = bin2int(binStr, hdr_idx, 3)
-    print(f'rsvd2 is {rsvd2}')
-
     hop_metadata_len, hdr_idx = bin2int(binStr, hdr_idx, 5)
-    print(f'hop_metadata_len is {hop_metadata_len}')
-
     remaining_hop_cnt, hdr_idx = bin2int(binStr, hdr_idx, 8)
-    print(f'remaining_hop_cnt is {remaining_hop_cnt}')
-
     instruction_mask_0003, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'instruction_mask_0003 is {instruction_mask_0003}')
-
     instruction_mask_0407, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'instruction_mask_0407 is {instruction_mask_0407}')
-
     instruction_mask_0811, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'instruction_mask_0811 is {instruction_mask_0811}')
-
     instruction_mask_1215, hdr_idx = bin2int(binStr, hdr_idx, 4)
-    print(f'instruction_mask_1215 is {instruction_mask_1215}')
-
     rsvd3, hdr_idx = bin2int(binStr, hdr_idx, 16)
-    print(f'rsvd3 is {rsvd3}')
+
+
+    if printInfo:
+        print("int_header".center(40, "*"))
+        print(f'ver is {ver}')
+        print(f'rep is {rep}')
+        print(f'c is {c}')
+        print(f'e is {e}')
+        print(f'm is {m}')
+        print(f'rsvd1 is {rsvd1}')
+        print(f'rsvd2 is {rsvd2}')
+        print(f'hop_metadata_len is {hop_metadata_len}')
+        print(f'remaining_hop_cnt is {remaining_hop_cnt}')
+        print(f'instruction_mask_0003 is {instruction_mask_0003}')
+        print(f'instruction_mask_0407 is {instruction_mask_0407}')
+        print(f'instruction_mask_0811 is {instruction_mask_0811}')
+        print(f'instruction_mask_1215 is {instruction_mask_1215}')
+        print(f'rsvd3 is {rsvd3}')
 
     return payload_idx
  
 # currently does not support multiple transits with different modes (different num_fileds) 
 # num_fields is the number of fields that are set valid during int transit
 # num_transits is the number of 
-def parse_int_data(num_fields, num_transits, payload, payload_idx) :
+def parse_int_data(num_fields, num_transits, payload, payload_idx, printInfo=False) :
     
     #  each field is 32 bits, which is 4 bytes
     int_data = payload[payload_idx : payload_idx + (4 * num_fields * num_transits)]
+
+    print(f"length of payload is {len(payload)}, payload_idx is {payload_idx} to {payload_idx + (4 * num_fields * num_transits)}, length of int_data is {len(int_data)} ")
     payload_idx += 4 * num_fields * num_transits
 
     hdr_idx = 0
     binStr : str = bytes2bin(int_data)
 
-    print("int_data".center(40, "*"))
+    if printInfo:
+        print("int_data".center(40, "*"), "\n")
 
     for i in range(num_transits):
 
         int_switch_id, hdr_idx = bin2int(binStr, hdr_idx, 32)
-        print(f'int_switch_id is {int_switch_id}')
-
         ingress_port_id, hdr_idx = bin2int(binStr, hdr_idx, 16)
-        print(f'ingress_port_id is {ingress_port_id}')
-
         egress_port_id, hdr_idx = bin2int(binStr, hdr_idx, 16)
-        print(f'egress_port_id is {egress_port_id}')
-
         int_hop_latency, hdr_idx = bin2int(binStr, hdr_idx, 32)
-        print(f'int_hop_latency is {int_hop_latency}')
-
         q_id, hdr_idx = bin2int(binStr, hdr_idx, 8)
-        print(f'q_id is {q_id}')
-
         q_occupancy, hdr_idx = bin2int(binStr, hdr_idx, 24)
-        print(f'q_occupancy is {q_occupancy}')
-
         int_ingress_tstamp, hdr_idx = bin2int(binStr, hdr_idx, 32)
-        print(f'int_ingress_tstamp is {int_ingress_tstamp}')
-
         int_egress_tstamp, hdr_idx = bin2int(binStr, hdr_idx, 32)
-        print(f'int_egress_tstamp is {int_egress_tstamp}')
-
         ingress_port_id, hdr_idx = bin2int(binStr, hdr_idx, 16)
-        print(f'ingress_port_id is {ingress_port_id}')
-
         egress_port_id, hdr_idx = bin2int(binStr, hdr_idx, 16)
-        print(f'egress_port_id is {egress_port_id}')
-
         int_egress_port_tx_util, hdr_idx = bin2int(binStr, hdr_idx, 32)
-        print(f'int_egress_port_tx_util is {int_egress_port_tx_util}')
+
+        if printInfo:
+            print(f"switch {int_switch_id}".center(40, "*"))
+            print(f'int_switch_id is {int_switch_id}')
+            print(f'ingress_port_id is {ingress_port_id}')
+            print(f'egress_port_id is {egress_port_id}')
+            print(f'int_hop_latency is {int_hop_latency}')
+            print(f'q_id is {q_id}')     
+            print(f'q_occupancy is {q_occupancy}')
+            print(f'int_ingress_tstamp is {int_ingress_tstamp}')
+            print(f'int_egress_tstamp is {int_egress_tstamp}')
+            print(f'ingress_port_id is {ingress_port_id}')
+            print(f'ingress_port_id is {ingress_port_id}')
+            print(f'egress_port_id is {egress_port_id}')
+            print(f'int_egress_port_tx_util is {int_egress_port_tx_util}')
 
     return payload_idx
 
@@ -375,7 +356,7 @@ def int_parser(payload : bytes) :
     payload_idx = parse_udp_hdr(payload, payload_idx)
     payload_idx = parse_int_shim_hdr(payload, payload_idx)
     payload_idx = parse_int_header(payload, payload_idx)
-    payload_idx = parse_int_data(8, 1, payload, payload_idx)
+    payload_idx = parse_int_data(8, 2, payload, payload_idx, printInfo=True)
     
 def get_if():
     ifs = get_if_list()
