@@ -8,6 +8,7 @@ from scapy.all import Packet, IPOption
 from scapy.all import ShortField, IntField, LongField, BitField, FieldListField, FieldLenField
 from scapy.all import IP, TCP, UDP, Raw
 from scapy.layers.inet import _IPOption_HDR
+import time
 
 # header sizes in bytes
 INT_REPORT_SIZE = 16
@@ -18,6 +19,16 @@ INT_SHIM_SIZE = 4
 INT_HEADER = 8
 
 BYTE_SIZE = 8
+
+# use this constant to specify which int data to collect
+INGRESS_PORT_ID_DATA = 0
+EGRESS_PORT_ID_DATA = 1
+HOP_LATENCY_DATA = 2
+Q_ID_DATA = 3
+Q_OCCUPANCY_DATA = 4
+INGRESS_TSTAMP_DATA = 5
+EGRESS_TSTAMP_DATA = 6
+EGRESS_PORT_TX_UTIL_DATA = 7
 
 # convert a byte String to a binary String
 def bytes2bin(byteStr : bytes):
@@ -295,12 +306,9 @@ def parse_int_header(payload : bytes, payload_idx, printInfo=False):
 # currently does not support multiple transits with different modes (different num_fileds) 
 # num_fields is the number of fields that are set valid during int transit
 # num_transits is the number of 
-def parse_int_data(num_fields, num_transits, payload, payload_idx, printInfo=False) :
-    
+def parse_int_data(num_fields, num_transits, payload, payload_idx, dataToRecord, s1, s2, s3, s4, tic, printInfo=False) :
     #  each field is 32 bits, which is 4 bytes
     int_data = payload[payload_idx : payload_idx + (4 * num_fields * num_transits)]
-
-    print(f"length of payload is {len(payload)}, payload_idx is {payload_idx} to {payload_idx + (4 * num_fields * num_transits)}, length of int_data is {len(int_data)} ")
     payload_idx += 4 * num_fields * num_transits
 
     hdr_idx = 0
@@ -325,7 +333,6 @@ def parse_int_data(num_fields, num_transits, payload, payload_idx, printInfo=Fal
 
         if printInfo:
             print(f"switch {int_switch_id}".center(40, "*"))
-            print(f'int_switch_id is {int_switch_id}')
             print(f'ingress_port_id is {ingress_port_id}')
             print(f'egress_port_id is {egress_port_id}')
             print(f'int_hop_latency is {int_hop_latency}')
@@ -333,15 +340,32 @@ def parse_int_data(num_fields, num_transits, payload, payload_idx, printInfo=Fal
             print(f'q_occupancy is {q_occupancy}')
             print(f'int_ingress_tstamp is {int_ingress_tstamp}')
             print(f'int_egress_tstamp is {int_egress_tstamp}')
-            print(f'ingress_port_id is {ingress_port_id}')
-            print(f'ingress_port_id is {ingress_port_id}')
-            print(f'egress_port_id is {egress_port_id}')
             print(f'int_egress_port_tx_util is {int_egress_port_tx_util}')
+
+        toc = time.perf_counter()
+
+        fileToWrite = None
+
+        if int_switch_id == 1:
+            fileToWrite = s1
+        elif int_switch_id == 2:
+            fileToWrite = s2
+        elif int_switch_id == 3:
+            fileToWrite = s3
+        elif int_switch_id == 4:
+            fileToWrite = s4
+        
+        if dataToRecord == HOP_LATENCY_DATA:
+            fileToWrite.write(f"{toc - tic:0.4f}, {int_hop_latency}\n")
+        elif dataToRecord == Q_OCCUPANCY_DATA:
+            fileToWrite.write(f"{toc - tic:0.4f}, {q_occupancy}\n")
 
     return payload_idx
 
 # printInfo sets either to print the packet headers and int data
-def int_parser(payload : bytes, printInfo=False) :
+def int_parser(payload : bytes, s1, s2, s3, s4, tic, printInfo=False) :
+
+    dataToRecord = Q_OCCUPANCY_DATA
     #  INT report strucure
     # [Eth][IP][UDP][INT RAPORT HDR][ETH][IP][UDP/TCP][INT SHIM][INT HEADER][INT DATA]
     # payload : [INT RAPORT HDR]      [ETH]                  [IP]             
@@ -357,7 +381,7 @@ def int_parser(payload : bytes, printInfo=False) :
     payload_idx = parse_udp_hdr(payload, payload_idx, printInfo=printInfo)
     payload_idx = parse_int_shim_hdr(payload, payload_idx, printInfo=printInfo)
     payload_idx = parse_int_header(payload, payload_idx, printInfo=printInfo)
-    payload_idx = parse_int_data(8, 3, payload, payload_idx, printInfo)
+    payload_idx = parse_int_data(8, 3, payload, payload_idx, dataToRecord, s1, s2, s3, s4, tic, printInfo=printInfo)
     
 def get_if():
     ifs = get_if_list()
@@ -372,21 +396,28 @@ def get_if():
     return iface
 
 
-def handle_pkt(pkt):
+def handle_pkt(pkt, s1, s2, s3, s4, tic):
     if UDP in pkt and pkt[UDP].dport == 8002:
         # print("got a packet")
         # pkt.show2()
         payload = bytes(pkt[UDP].payload)
-        int_parser(payload)
+        int_parser(payload, s1, s2, s3, s4, tic)
         sys.stdout.flush()
 
 
 def main():
-    iface = get_if()
-    print("sniffing on %s" % iface)
-    sys.stdout.flush()
-    sniff(iface=iface,
-          prn=lambda x: handle_pkt(x))
+
+    with open("s1_data.txt", "w") as s1, \
+         open("s2_data.txt", "w") as s2, \
+         open("s3_data.txt", "w") as s3, \
+         open("s4_data.txt", "w") as s4: 
+        
+        tic = time.perf_counter()
+        iface = get_if()
+        print("sniffing on %s" % iface)
+        sys.stdout.flush()
+        sniff(iface=iface,
+            prn=lambda x: handle_pkt(x, s1, s2, s3, s4, tic))
 
 
 if __name__ == '__main__':
