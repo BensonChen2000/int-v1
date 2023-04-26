@@ -19,3 +19,6 @@ simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_set_source int_se
 
 # The last value of 0 in the table_add command sets the priority. This value seems to be mandatory when using ternary match.
 simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_int_source int_source_dscp 10.0.1.1&&&0xFFFFFF00 10.0.2.2&&&0xFFFFFF00 0x1F41&&&0x0000 0x1F41&&&0x0000 => 8 4 0xF 0xF 0"
+
+simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_int_transit configure_transit => 1"
+simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_set_transit int_set_transit 1 =>"

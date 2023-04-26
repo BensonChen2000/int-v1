@@ -11,3 +11,4 @@ simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_configure_sink co
 simple_switch_CLI --thrift-port $THRIFT_PORT <<< "mirroring_add 1 3"
 
 simple_switch_CLI --thrift-port $THRIFT_PORT <<< "table_add tb_int_reporting send_report => 08:00:00:00:02:22  10.0.2.2  08:00:00:00:04:00  10.0.4.4  8002"
+
