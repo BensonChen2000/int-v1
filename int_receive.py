@@ -340,7 +340,8 @@ def parse_int_data(num_fields, num_transits, payload, payload_idx, printInfo=Fal
 
     return payload_idx
 
-def int_parser(payload : bytes) :
+# printInfo sets either to print the packet headers and int data
+def int_parser(payload : bytes, printInfo=False) :
     #  INT report strucure
     # [Eth][IP][UDP][INT RAPORT HDR][ETH][IP][UDP/TCP][INT SHIM][INT HEADER][INT DATA]
     # payload : [INT RAPORT HDR]      [ETH]                  [IP]             
@@ -350,13 +351,13 @@ def int_parser(payload : bytes) :
     
     # start parsing from index = payload_idx
     payload_idx = 0
-    payload_idx = parse_int_report_hdr(payload, payload_idx)
-    payload_idx = parse_ethernet_hdr(payload, payload_idx)
-    payload_idx = parse_ipv4_hdr(payload, payload_idx)
-    payload_idx = parse_udp_hdr(payload, payload_idx)
-    payload_idx = parse_int_shim_hdr(payload, payload_idx)
-    payload_idx = parse_int_header(payload, payload_idx)
-    payload_idx = parse_int_data(8, 2, payload, payload_idx, printInfo=True)
+    payload_idx = parse_int_report_hdr(payload, payload_idx, printInfo=printInfo)
+    payload_idx = parse_ethernet_hdr(payload, payload_idx, printInfo=printInfo)
+    payload_idx = parse_ipv4_hdr(payload, payload_idx, printInfo=printInfo)
+    payload_idx = parse_udp_hdr(payload, payload_idx, printInfo=printInfo)
+    payload_idx = parse_int_shim_hdr(payload, payload_idx, printInfo=printInfo)
+    payload_idx = parse_int_header(payload, payload_idx, printInfo=printInfo)
+    payload_idx = parse_int_data(8, 3, payload, payload_idx, printInfo)
     
 def get_if():
     ifs = get_if_list()
@@ -373,8 +374,8 @@ def get_if():
 
 def handle_pkt(pkt):
     if UDP in pkt and pkt[UDP].dport == 8002:
-        print("got a packet")
-        pkt.show2()
+        # print("got a packet")
+        # pkt.show2()
         payload = bytes(pkt[UDP].payload)
         int_parser(payload)
         sys.stdout.flush()
