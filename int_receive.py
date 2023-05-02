@@ -398,7 +398,7 @@ def get_if():
 
 def handle_pkt(pkt, s1, s2, s3, s4, tic):
     if UDP in pkt and pkt[UDP].dport == 8002:
-        # print("got a packet")
+        print("got a packet")
         # pkt.show2()
         payload = bytes(pkt[UDP].payload)
         int_parser(payload, s1, s2, s3, s4, tic)
