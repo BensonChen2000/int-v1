@@ -365,7 +365,7 @@ def parse_int_data(num_fields, num_transits, payload, payload_idx, dataToRecord,
 # printInfo sets either to print the packet headers and int data
 def int_parser(payload : bytes, s1, s2, s3, s4, tic, printInfo=False) :
 
-    dataToRecord = Q_OCCUPANCY_DATA
+    dataToRecord = HOP_LATENCY_DATA
     #  INT report strucure
     # [Eth][IP][UDP][INT RAPORT HDR][ETH][IP][UDP/TCP][INT SHIM][INT HEADER][INT DATA]
     # payload : [INT RAPORT HDR]      [ETH]                  [IP]             
